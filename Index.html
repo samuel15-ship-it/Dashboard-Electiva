@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Asignación de Pasantías Profesionales</title>
+  <!-- Tailwind CSS para los estilos visuales -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js para los gráficos interactivos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Iconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 p-4 md:p-8">
+
+  <div class="max-w-7xl mx-auto space-y-6">
+    
+    <!-- Encabezado -->
+    <header class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="text-blue-600"></i>
+          Gestión de Asignación de Pasantías Profesionales
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">
+          Sede Cabimas — Modalidad Presencial | Sistema de Validación Normativa
+        </p>
+      </div>
+      <span class="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-200 flex items-center gap-1.5">
+        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Costa Oriental del Lago
+      </span>
+    </header>
+
+    <!-- Tarjetas KPI (Métricas Principales) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Solicitudes</p>
+        <p id="kpi-total" class="text-3xl font-extrabold text-slate-800 mt-1">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Elegibles / Asignados</p>
+        <p id="kpi-elegibles" class="text-3xl font-extrabold text-emerald-600 mt-1">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">No Elegibles</p>
+        <p id="kpi-no-elegibles" class="text-3xl font-extrabold text-rose-600 mt-1">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tasa de Elegibilidad</p>
+        <p id="kpi-tasa" class="text-3xl font-extrabold text-blue-600 mt-1">0%</p>
+      </div>
+    </div>
+
+    <!-- Layout Principal: Evaluador + Tabla -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Columna Izquierda: Formulario Evaluador -->
+      <div class="lg:col-span-5 bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-3 flex items-center gap-2">
+          <i data-lucide="clipboard-check" class="text-blue-600"></i>
+          Evaluador de Elegibilidad
+        </h2>
+
+        <form id="evaluator-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nombre y Apellido</label>
+            <input type="text" id="nombre" required placeholder="Ej: Carlos Mendoza" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Carrera</label>
+            <select id="carrera" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="Ingeniería en Informática">Ingeniería en Informática</option>
+              <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+              <option value="Licenciatura en Administración">Licenciatura en Administración</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">% Materias Approved</label>
+              <input type="number" id="materias" min="0" max="100" value="50" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              <p class="text-[10px] text-slate-500 mt-1">Mínimo: 50%</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Promedio (0-20)</label>
+              <input type="number" id="promedio" step="0.1" min="0" max="20" value="12" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              <p class="text-[10px] text-slate-500 mt-1">Mínimo: 12 pts</p>
+            </div>
+          </div>
+
+          <!-- Servicio Comunitario -->
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+            <p class="text-xs font-semibold text-slate-700 uppercase">Servicio Comunitario</p>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input type="checkbox" id="fase1" checked class="w-4 h-4 text-blue-600 rounded"> Fase I Aprobada
+              </label>
+              <label class="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input type="checkbox" id="fase2" checked class="w-4 h-4 text-blue-600 rounded"> Fase II Aprobada
+              </label>
+            </div>
+          </div>
+
+          <!-- Origen del Estudiante -->
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+            <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase cursor-pointer">
+              <input type="checkbox" id="esTraslado" class="w-4 h-4 text-blue-600 rounded"> Proviene de Otra Universidad
+            </label>
+            <div id="box-exoneracion" class="hidden pl-6 pt-1">
+              <label class="flex items-center gap-2 text-xs font-medium text-blue-700 cursor-pointer">
+                <input type="checkbox" id="exoneracion" checked class="w-4 h-4 text-blue-600 rounded"> Tiene Aprobación por Exoneración
+              </label>
+            </div>
+          </div>
+
+          <!-- Caja de Resultado Dinámica -->
+          <div id="resultado-status" class="p-3 rounded-lg border text-xs font-semibold flex items-center gap-2 bg-emerald-50 text-emerald-800 border-emerald-200">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+            <span>Estudiante ELEGIBLE para asignación presencial</span>
+          </div>
+
+          <!-- Selección de Empresa Presencial -->
+          <div id="box-empresa">
+            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Empresa / Institución (Cabimas)</label>
+            <select id="empresa" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="PDVSA La Salina - Gerencia DSI">PDVSA La Salina - Gerencia DSI</option>
+              <option value="PEQUIVEN - Complejo Ana María Campos">PEQUIVEN - Complejo Ana María Campos</option>
+              <option value="Petrocabimas S.A.">Petrocabimas S.A.</option>
+              <option value="Alcaldía Bolivariana de Cabimas">Alcaldía Bolivariana de Cabimas</option>
+              <option value="Hospital General Dr. Adolfo D'Empaire">Hospital General Dr. Adolfo D'Empaire</option>
+            </select>
+          </div>
+
+          <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+            Registrar Estudiante
+          </button>
+        </form>
+      </div>
+
+      <!-- Columna Derecha: Tabla de Registros -->
+      <div class="lg:col-span-7 bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800 border-b pb-3 flex items-center gap-2 mb-4">
+            <i data-lucide="users" class="text-blue-600"></i>
+            Estudiantes Registrados
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-600 border-b">
+                  <th class="p-2.5">Estudiante</th>
+                  <th class="p-2.5">Carrera</th>
+                  <th class="p-2.5 text-center">% Mat.</th>
+                  <th class="p-2.5 text-center">Prom.</th>
+                  <th class="p-2.5 text-center">Estado</th>
+                  <th class="p-2.5">Asignación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-estudiantes" class="divide-y text-slate-700">
+                <!-- Se llena dinámicamente con JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Gráfico de distribución -->
+        <div class="mt-6 border-t pt-4">
+          <p class="text-xs font-bold text-slate-700 uppercase mb-2">Relación Elegibles vs No Elegibles</p>
+          <div class="h-40">
+            <canvas id="chartElegibilidad"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lógica JavaScript pura -->
+  <script>
+    // 1. Datos iniciales de prueba
+    let estudiantes = [
+      {
+        nombre: "Carlos Eduardo Mendoza",
+        carrera: "Ingeniería en Informática",
+        materias: 75,
+        promedio: 15.4,
+        fase1: true,
+        fase2: true,
+        esTraslado: false,
+        exoneracion: true,
+        estado: "Elegible",
+        empresa: "PDVSA La Salina - Gerencia DSI"
+      },
+      {
+        nombre: "María Victoria Gutiérrez",
+        carrera: "Ingeniería Industrial",
+        materias: 45,
+        promedio: 11.5,
+        fase1: true,
+        fase2: false,
+        esTraslado: true,
+        exoneracion: false,
+        estado: "No Elegible",
+        empresa: "N/A"
+      }
+    ];
+
+    let chartInstance = null;
+
+    // 2. Elementos del DOM
+    const form = document.getElementById('evaluator-form');
+    const inputNombre = document.getElementById('nombre');
+    const inputCarrera = document.getElementById('carrera');
+    const inputMaterias = document.getElementById('materias');
+    const inputPromedio = document.getElementById('promedio');
+    const chkFase1 = document.getElementById('fase1');
+    const chkFase2 = document.getElementById('fase2');
+    const chkEsTraslado = document.getElementById('esTraslado');
+    const boxExoneracion = document.getElementById('box-exoneracion');
+    const chkExoneracion = document.getElementById('exoneracion');
+    const statusBox = document.getElementById('resultado-status');
+    const boxEmpresa = document.getElementById('box-empresa');
+    const selectEmpresa = document.getElementById('empresa');
+
+    // 3. Mostrar/ocultar casilla de exoneración si es traslado
+    chkEsTraslado.addEventListener('change', () => {
+      if (chkEsTraslado.checked) {
+        boxExoneracion.classList.remove('hidden');
+      } else {
+        boxExoneracion.classList.add('hidden');
+      }
+      validarElegibilidadEnvio();
+    });
+
+    // 4. Función central para evaluar los 4 requisitos en tiempo real
+    function evaluarReglas() {
+      const mat = parseFloat(inputMaterias.value) || 0;
+      const prom = parseFloat(inputPromedio.value) || 0;
+      const f1 = chkFase1.checked;
+      const f2 = chkFase2.checked;
+      const esTras = chkEsTraslado.checked;
+      const exon = chkExoneracion.checked;
+
+      const cumpleMaterias = mat >= 50;
+      const cumplePromedio = prom >= 12;
+      const cumpleServicio = f1 && f2;
+      const cumpleExoneracion = !esTras || (esTras && exon);
+
+      return cumpleMaterias && cumplePromedio && cumpleServicio && cumpleExoneracion;
+    }
+
+    function validarElegibilidadEnvio() {
+      const esElegible = evaluarReglas();
+      if (esElegible) {
+        statusBox.className = "p-3 rounded-lg border text-xs font-semibold flex items-center gap-2 bg-emerald-50 text-emerald-800 border-emerald-200";
+        statusBox.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i><span>Estudiante ELEGIBLE para asignación presencial</span>`;
+        boxEmpresa.classList.remove('hidden');
+      } else {
+        statusBox.className = "p-3 rounded-lg border text-xs font-semibold flex items-center gap-2 bg-rose-50 text-rose-800 border-rose-200";
+        statusBox.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-rose-600"></i><span>No cumple con la totalidad de los requisitos normativos</span>`;
+        boxEmpresa.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // Escuchar cambios en el formulario en tiempo real
+    [inputMaterias, inputPromedio, chkFase1, chkFase2, chkExoneracion].forEach(el => {
+      el.addEventListener('input', validarElegibilidadEnvio);
+      el.addEventListener('change', validarElegibilidadEnvio);
+    });
+
+    // 5. Agregar estudiante al enviar formulario
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const esElegible = evaluarReglas();
+
+      const nuevoEstudiante = {
+        nombre: inputNombre.value,
+        carrera: inputCarrera.value,
+        materias: parseFloat(inputMaterias.value),
+        promedio: parseFloat(inputPromedio.value),
+        fase1: chkFase1.checked,
+        fase2: chkFase2.checked,
+        esTraslado: chkEsTraslado.checked,
+        exoneracion: chkExoneracion.checked,
+        estado: esElegible ? "Elegible" : "No Elegible",
+        empresa: esElegible ? selectEmpresa.value : "N/A"
+      };
+
+      estudiantes.unshift(nuevoEstudiante);
+      form.reset();
+      inputMaterias.value = 50;
+      inputPromedio.value = 12;
+      chkFase1.checked = true;
+      chkFase2.checked = true;
+      chkEsTraslado.checked = false;
+      boxExoneracion.classList.add('hidden');
+      validarElegibilidadEnvio();
+      actualizarInterfaz();
+    });
+
+    // 6. Actualizar la interfaz (Tabla + KPIs + Gráfico)
+    function actualizarInterfaz() {
+      const tbody = document.getElementById('tabla-estudiantes');
+      tbody.innerHTML = '';
+
+      let countElegibles = 0;
+      let countNoElegibles = 0;
+
+      estudiantes.forEach((est) => {
+        if (est.estado === 'Elegible') countElegibles++;
+        else countNoElegibles++;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-2.5 font-semibold text-slate-800">${est.nombre}</td>
+          <td class="p-2.5 text-slate-600">${est.carrera}</td>
+          <td class="p-2.5 text-center">${est.materias}%</td>
+          <td class="p-2.5 text-center font-semibold">${est.promedio.toFixed(1)}</td>
+          <td class="p-2.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${est.estado === 'Elegible' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+              ${est.estado}
+            </span>
+          </td>
+          <td class="p-2.5 text-slate-600">${est.empresa}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Actualizar KPIs
+      const total = estudiantes.length;
+      document.getElementById('kpi-total').textContent = total;
+      document.getElementById('kpi-elegibles').textContent = countElegibles;
+      document.getElementById('kpi-no-elegibles').textContent = countNoElegibles;
+      const tasa = total > 0 ? Math.round((countElegibles / total) * 100) : 0;
+      document.getElementById('kpi-tasa').textContent = `${tasa}%`;
+
+      // Actualizar Gráfico
+      renderChart(countElegibles, countNoElegibles);
+      lucide.createIcons();
+    }
+
+    // 7. Renderizar Gráfico Chart.js
+    function renderChart(elegibles, noElegibles) {
+      const ctx = document.getElementById('chartElegibilidad').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Elegibles', 'No Elegibles'],
+          datasets: [{
+            label: 'Cantidad de Estudiantes',
+            data: [elegibles, noElegibles],
+            backgroundColor: ['#10b981', '#f43f5e'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+
+    // Inicializar al cargar
+    actualizarInterfaz();
+    validarElegibilidadEnvio();
+  </script>
+</body>
+</html>
